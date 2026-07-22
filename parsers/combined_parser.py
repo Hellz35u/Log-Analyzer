@@ -3,61 +3,36 @@ import re
 
 class CombinedParser(LogParser):
 
+    pattern = re.compile(
+            r'^(\S+) \S+ \S+ \[(.*?)\] '
+            r'"(\S+) (\S+) (\S+)" '
+            r'(\d{3}) (\S+) '
+            r'"(.*?)" "(.*?)"$'
+        )
+
+
     def parse(self, line):
 
-        ip = None
-        timestamp = None
-        method = None
-        path = None
-        http_version = None
-        status_code = None
-        response_size = None
-        referer = None
-        user_agent = None
+        match = self.pattern.match(line)
+        
+        if not match:
+            raise ValueError("Invalid Combined Log format.")
+        
+        ip = match.group(1)
+        timestamp = match.group(2)
+        method = match.group(3)
+        path = match.group(4)
+        http_version = match.group(5)
+        status_code = int(match.group(6))
+        
+        response_size = match.group(7)
+        if response_size == "-":
+            response_size = None
+        else:
+            response_size = int(match.group(7))
 
-        match = re.match(r"^(\S+)", line)
-        if match is not None:
-            ip = match.group(1)
-
-        match = re.search(r"\[(.*?)\]", line)
-        if match is not None:
-            timestamp = match.group(1)
-
-        match = re.search(r'"(\S+)\s', line)
-        if match is not None:
-            method = match.group(1)
-
-        # Path
-        match = re.search(r'"\S+\s(\S+)\sHTTP/\S+"', line)
-        if match is not None:
-            path = match.group(1)
-
-        match = re.search(r'(HTTP/\S+)', line)
-        if match is not None:
-            http_version = match.group(1)
-
-        match = re.search(r'"\s(\d{3})\s', line)
-        if match is not None:
-            status_code = int(match.group(1))
-
-        match = re.search(r'"\s\d{3}\s(\d+|-)', line)
-        if match is not None:
-            value = match.group(1)
-
-            if value == "-":
-                response_size = None
-            else:
-                response_size = int(value)
-
-        # Referer
-        match = re.search(r'"\s\d{3}\s(?:\d+|-)\s"([^"]*)"', line)
-        if match is not None:
-            referer = match.group(1)
-
-        # User-Agent
-        match = re.search(r'"\s\d{3}\s(?:\d+|-)\s"[^"]*"\s"([^"]*)"$', line.strip())
-        if match is not None:
-            user_agent = match.group(1)
+        referer = match.group(8)
+        user_agent = match.group(9)
 
         result = {
             "ip": ip,
