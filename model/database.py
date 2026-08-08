@@ -1,0 +1,37 @@
+import sqlite3
+
+DATABASE_PATH = "data/log_analyzer.db"
+
+def get_connection():
+    return sqlite3.connect(DATABASE_PATH)
+
+def create_table():
+    connection = get_connection()
+    cursor = connection.cursor()
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        password_hash BLOB NOT NULL,
+        create_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS analysis (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        file_name TEXT NOT NULL,
+        analysis_result TEXT NOT NULL,
+        create_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+        """
+    )
+
+    connection.commit()
+    connection.close()
