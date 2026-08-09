@@ -3,7 +3,10 @@ import sqlite3
 DATABASE_PATH = "data/log_analyzer.db"
 
 def get_connection():
-    return sqlite3.connect(DATABASE_PATH)
+    connection = sqlite3.connect(DATABASE_PATH)
+    connection.row_factory = sqlite3.Row
+    return connection
+
 
 def create_table():
     connection = get_connection()
