@@ -1,7 +1,7 @@
 from sqlite3 import DatabaseError
 import sqlite3
-from model.user_model import add_new_user, get_user_by_username, get_user_by_id
-from model.database import get_connection
+from models.user_model import add_new_user, get_user_by_username, get_user_by_id
+from models.database import get_connection
 from services.validators import validate_password, validate_username
 import bcrypt
 
@@ -51,4 +51,6 @@ def register(username, password):
             "message": "Database Error",
             "status_code": 500
         }
-        
+
+def login(username, password):
+    
