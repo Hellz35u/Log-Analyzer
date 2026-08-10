@@ -2,6 +2,7 @@ import hashlib
 from datetime import datetime, timedelta
 from sqlite3 import DatabaseError
 import sqlite3
+from models.session_model import delete_session, get_session_by_token_hash
 from models.user_model import add_new_user, get_user_by_username, get_user_by_id
 from models.database import get_connection
 from services.validators import validate_password, validate_username
@@ -94,6 +95,34 @@ def login(username, password):
 
     except DatabaseError:
         return{
+            "success": False,
+            "message": "Database error",
+            "status_code": 500
+        }
+
+def logout(token):
+    try:
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
+
+        session = get_session_by_token_hash(token_hash)
+
+        if session is None:
+            return {
+                "success": False,
+                "message": "Invalid session",
+                "status_code": 401
+            }
+
+        delete_session(token_hash)
+
+        return {
+            "success": True,
+            "message": "Logout successfully",
+            "status_code": 200
+        }
+
+    except DatabaseError:
+        return {
             "success": False,
             "message": "Database error",
             "status_code": 500
