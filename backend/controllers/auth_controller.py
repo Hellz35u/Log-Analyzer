@@ -1,9 +1,14 @@
+import hashlib
+from datetime import datetime, timedelta
 from sqlite3 import DatabaseError
 import sqlite3
 from models.user_model import add_new_user, get_user_by_username, get_user_by_id
 from models.database import get_connection
 from services.validators import validate_password, validate_username
+from models.session_model import create_session
 import bcrypt
+import secrets
+
 
 def register(username, password):
     password_bytes = password.encode()
@@ -53,4 +58,43 @@ def register(username, password):
         }
 
 def login(username, password):
-    
+    try:
+        user = get_user_by_username(username)
+
+        if user is None:
+            return{
+                "success": False,
+                "message": "Invalid username or password",
+                "status_code": 401
+            }
+
+        password_bytes = password.encode()
+
+        if not bcrypt.checkpw(password_bytes, user["password"]):
+            return{
+                "success": False,
+                "message": "Invalid username or password",
+                "status_code": 401
+            }
+        
+        token = secrets.token_urlsafe(32)
+
+        token_hash = hashlib.sha256(token.encode()).hexdigest()
+
+        expires_at = datetime.now() + timedelta(hours=24)
+
+        create_session(user["id"], token_hash, expires_at)
+
+        return {
+            "success": True,
+            "message": "Login successfully",
+            "status_code": 200,
+            "token": token
+        }
+
+    except DatabaseError:
+        return{
+            "success": False,
+            "message": "Database error",
+            "status_code": 500
+        }
