@@ -1,6 +1,6 @@
 from parsers.combined_parser import CombinedParser
 from parsers.common_parser import CommonParser
-from controller.analysis_controller import analyze_log_file
+from controllers.analysis_controller import analyze_log_file
 from services.report_formatter import format_analysis_result
 
 def choose_parser(parser_type):

@@ -18,7 +18,7 @@ def create_session(user_id, token_hash, expires_at):
 
         connection.commit()
 
-        return connection.lastrowid
+        return cursor.lastrowid
     
     finally:
         if connection:
