@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 import os
 import tempfile
 
-from backend.parsers import common_parser
 from controllers.analysis_controller import analyze_log_file
 from parsers.combined_parser import CombinedParser
 from parsers.common_parser import CommonParser
